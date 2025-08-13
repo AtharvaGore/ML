@@ -104,7 +104,7 @@ for j in range(700):
     for i in range(8):
         summation = temp2[:, i].sum()
         node1.inputs[i,0] = node1.inputs[i,0] - 0.05*summation
-        print(node1.inputs[i,0])
+        # print(node1.inputs[i,0])
     
 # print(bias3)
 # print(bias4)
