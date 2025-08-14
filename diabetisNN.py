@@ -5,7 +5,7 @@ final2=[]
 with open('diabetes.csv','r') as f:
     f.readline()
     
-    for i in range(700):
+    for i in range(750):
         row = f.readline().split(',')
         final2.append([float(row[-1])])
         row = row[0:len(row)-1]
@@ -44,7 +44,7 @@ pN = eN/(eY + eN)
 
 temp = (1/(1+np.exp(Xtheta1)))*np.exp(Xtheta1)
 temp2 = []
-for i in range(700):
+for i in range(750):
     if Y[i,0] == 1:
         temp2.append([pN[i,0]*(theta5-theta3)])
     else:
@@ -56,7 +56,7 @@ temp2 = X*temp2
 
 
 summation=0
-for j in range(700):
+for j in range(750):
 
     node1input = np.dot(X,node1.inputs) + node1.bias
     node2input = np.dot(X,node2.inputs) + node2.bias
@@ -91,7 +91,7 @@ for j in range(700):
 
     temp = (1/(1+np.exp(Xtheta1)))*np.exp(Xtheta1)
     temp2 = []
-    for i in range(700):
+    for i in range(750):
         if Y[i,0] == 1:
             temp2.append([pN[i,0]*(theta5-theta3)])
         else:
@@ -105,6 +105,22 @@ for j in range(700):
         summation = temp2[:, i].sum()
         node1.inputs[i,0] = node1.inputs[i,0] - 0.05*summation
         # print(node1.inputs[i,0])
+
+    temp = (1/(1+np.exp(Xtheta2)))*np.exp(Xtheta2)
+    temp2 = []
+    for i in range(750):
+        if Y[i,0] == 1:
+            temp2.append([pN[i,0]*(theta6-theta4)])
+        else:
+            temp2.append([pY[i,0]*(theta4-theta6)])
+    temp2 = np.array(temp2)
+    temp2 = temp*temp2
+    temp2 = X*temp2
+
+
+    for i in range(8):
+        summation = temp2[:, i].sum()
+        node2.inputs[i,0] = node2.inputs[i,0] - 0.05*summation
     
 # print(bias3)
 # print(bias4)
@@ -112,19 +128,41 @@ for j in range(700):
 # print(theta4)
 #print(node1.inputs)
 
-# with open('diabetes.csv','r') as f:
-#     for i in range(705):
-#         f.readline()
+with open('diabetes.csv','r') as f:
+    for i in range(750):
+        f.readline()
+    
+    count=0
+    for i in range(10):
+        row = f.readline().split(',')
+        answer = float(row[-1])
+        row = row[0:len(row)-1]
+        print(row)
+        temp=[]
+        for j in row:
+            temp+=[float(j)]
+        row = np.array(temp)
+        row = (row-X_mean)/X_std
+        print(row)
+        node1input = np.dot(row,node1.inputs) + node1.bias
+        node2input = np.dot(row,node2.inputs) + node2.bias
+        Xtheta1 = node1input
+        Xtheta2 = node2input
 
-#         row = f.readline().split(',')
-#         real = int(row[-1])
-#         row = row[0:len(row)-1]
-#         temp=[]
-#         for j in row:
-#             temp+=[float(j)]
-#         row = np.array(temp)
-#         row = (row-X_mean)/X_std
-#         row = np.concatenate([[1],row])
+        node1input = np.log1p(np.exp(node1input))
+        node2input = np.log1p(np.exp(node2input))
+
+        rawY = node1input*theta3 + node2input*theta4 + bias3
+        rawN = node1input*theta5 + node2input*theta6 + bias4
+        print(rawY,rawN)
+        print(answer)
+        if rawY>rawN:
+            if answer == 1:
+                count+=1
+        elif rawN>rawY:
+            if answer == 0:
+                count+=1
+    print(count/10)
 
 
 
