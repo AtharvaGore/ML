@@ -133,8 +133,11 @@ with open('diabetes.csv','r') as f:
         f.readline()
     node3 = neuron.Neuron([[0.3], [-0.2], [0.1], [0.05], [-0.25], [0.15], [0.2], [-0.1]],[0.5, -0.5])
     node4 = neuron.Neuron([[-0.15], [0.25], [0.2], [-0.05], [0.3], [-0.2], [0.1], [0.05]],[-0.4, 0.4])
-
-    obj=neuron.NeuralNetwork(X,Y,node3,node4)
+    node5 = neuron.Neuron([[0.321],[-0.142],[0.567],[-0.654],[0.123],[-0.298],[0.432],[-0.075]],[-0.298, 0.411])
+    onehot = np.eye(2)[Y.ravel().astype(int)]
+    onehot = onehot[:, ::-1]
+    print(onehot)
+    obj=neuron.NeuralNetwork(X,Y,2,onehot,(node5,))
     obj.train()
 
     count=0
