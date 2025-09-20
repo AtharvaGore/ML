@@ -1,11 +1,8 @@
-# welcome to ml. this shit is extremely weird so beware. i know the logic behind backprop and all the maths, but stuff like overflow errors and most of the
-# numpy stuff was done by gpt. doesnt mean idk numpy, i do, but stuff like np.where and stuff is what i have no clue on. but those arent the main things in the
-# code so its fine.
-
-
 
 
 import numpy as np
+# initializes new neuron. each neuron has inputs, which are the weights going into it and outputs which are the weights going out of it to the output layer.
+# the bias is the input bias and the output bias is not included in this class
 class Neuron:
     def __init__(self,inputs,outputs):
         self.inputs = np.array(inputs)
@@ -15,6 +12,7 @@ class Neuron:
 
 
 class NeuralNetwork:
+    #initializes everything
     def __init__(self,data,expected,outputs,test,nodes):
         self.data = data
         self.Y = expected
@@ -22,24 +20,41 @@ class NeuralNetwork:
         self.test = test
         self.outputBias = [0.0 for i in range(outputs)]
         
+    # takes in a input and applies softplus on it
     def softplus(x):
         return np.where(x > 0, x + np.log1p(np.exp(-x)), np.log1p(np.exp(x)))
+        # this is complicated as it manages overflow errors and stuff. u can use basic softplus but there is a bigger risk of overflow errors
 
     def forwardPass(self,inputs):
-        
+        # this function takes in a input matrix and passes it through the neural network. each row of the matrix is the first test case, the next row is the 
+        # next test case and so on
+
+        # this contains the input weight vectors of all the nodes. it is stored as column vectors. first bias contains all the input biases of the nodes.
         firstNodeInputs = np.column_stack([n.inputs.flatten() for n in self.hiddenNodes])
         firstBias = np.array([n.bias for n in self.hiddenNodes])
 
+        # same thing as above but for the output nodes and the output biases
         hiddenNodeoutputs = np.vstack([n.outputs for n in self.hiddenNodes])
         hiddenNodeBiases = np.array(self.outputBias)
 
+        """ the first layer processing. row of inputs multiplies with a column of firstnodeinputs to get an element which is added with the firstbias for that
+        # node. that is ur first node number. same input row is used for all the columns, each column is the weights of the different nodes. so one row in the
+        # result is the same inputs processed through all the input weights. the next row is the same but for a different input test case.
+        """
         hiddenLayerInputs = (inputs @ firstNodeInputs) + firstBias
 
+
+        """ this applies the softplus function to all the elements of the matrix. a new variable is created cuz we need the non softplused version inside the
+        training loop """
         afterSoftplus = NeuralNetwork.softplus(hiddenLayerInputs)
 
+        """ all the aftersoftplus values are now passed throught the output weights to get the raw output. its very similar to the first layer processing just
+        that each row in aftersoftplus is still a different test case but modified by the first layer weights and softplused also"""
         rawOutput = (afterSoftplus @ hiddenNodeoutputs) + hiddenNodeBiases
 
+        """ this line stabilizes and prevents overflow errors. how? idk lmao but it still works without this line. its just for safety im pretty sure"""
         shifted = rawOutput - rawOutput.max(axis=1, keepdims=True)
+        
         expRaw = np.exp(shifted)
         predictions = [expRaw/expRaw.sum(axis=1, keepdims=True)]
         rawOutput = [rawOutput]
